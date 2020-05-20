@@ -1,2 +1,2 @@
 # chat-recorder
-Chat recorder for Twitch and Discord
+Chat recorder for ~~Twitch and~~ Discord
