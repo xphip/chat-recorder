@@ -19,24 +19,31 @@ const (
 	SQL_UpdateMessageDiscord_Fields = "in_status, cd_message_id, cd_guild, tx_guild, cd_channel, tx_channel, cd_author, tx_author, tx_message"
 	SQL_DeleteMessageDiscord_Fields = "in_status, cd_message_id, cd_guild, tx_guild, cd_channel, tx_channel"
 
+	SQL_CreateMessageDiscordLog_Fields 		= "in_status, tx_raw"
 	SQL_CreateMessageDiscordErrorLog_Fields = "in_status, tx_description, tx_raw"
 )
 
 const (
 	Table_Sys 						= "sys"
 	Table_MessageDiscord 			= "message_discord"
+	Table_MessageDiscordLog 		= "message_discord_log"
 	Table_MessageDiscordErrorLog 	= "message_discord_error_log"
 )
 
 const (
-	SQL_TYPE_CREATED = iota
+	SQL_TYPE_NULL = iota -1
+	SQL_TYPE_CREATED
 	SQL_TYPE_UPDATE
 	SQL_TYPE_DELETED
 )
 
 const (
+	MsgError_Marshal = "Marshal error"
+	MsgError_Unknown = "Unknown error"
+	MsgError_Ready = "Ready info error"
 	MsgError_Channel = "Channel info error"
 	MsgError_Guild = "Guild info error"
+	MsgError_Author = "Author info error"
 )
 
 // DBTable 				`json:"message_discord"`
@@ -57,6 +64,13 @@ type MessageDiscord struct {
 	AuthorName 	string 	`json:"tx_author"`
 
 	Message 	string 	`json:"tx_message"`
+}
+
+type MessageDiscordLog struct {
+	ID 			int 	`json:"cd_message"`
+	CreatedAt 	int 	`json:"dt_created"`
+	Status 		int 	`json:"in_status"`
+	Raw 		string 	`json:"tx_raw"`
 }
 
 type MessageDiscordErrorLog struct {

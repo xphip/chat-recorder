@@ -30,6 +30,16 @@ CREATE TABLE IF NOT EXISTS message_discord (
 
 );
 
+CREATE TABLE IF NOT EXISTS message_discord_log (
+	cd_message INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT UNIQUE, -- .PK.cd_message
+	dt_created INTEGER NOT NULL DEFAULT CURRENT_TIMESTAMP,
+
+	in_status INTEGER NOT NULL CHECK (in_status IN (0, 1, 2)) DEFAULT 0, -- 0:Created, 1:Edited, 2:Deleted
+
+	tx_raw TEXT
+);
+
+
 CREATE TABLE IF NOT EXISTS message_discord_error_log (
 	cd_message INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT UNIQUE, -- .PK.cd_message
 	dt_created INTEGER NOT NULL DEFAULT CURRENT_TIMESTAMP,

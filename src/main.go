@@ -7,6 +7,7 @@ import (
 	"os"
 	"os/signal"
 	"syscall"
+	"encoding/json"
 
 	"github.com/xphip-pack/discordgo"
 )
@@ -67,28 +68,75 @@ func main() {
 	dg.Close()
 }
 
-func ready(s *discordgo.Session, event *discordgo.Ready) {
+func ready(s *discordgo.Session, e *discordgo.Ready) {
+	j, err := json.Marshal(e)
+	if err != nil {
+		AddMessageDiscordErrorLog(MessageDiscordErrorLog{
+			Status: SQL_TYPE_NULL,
+			Description: MsgError_Marshal,
+			Raw: fmt.Sprintf("%s", j),
+		})
+	}
+
+	defer AddMessageDiscordErrorLog(MessageDiscordErrorLog{
+		Status: SQL_TYPE_NULL,
+		Description: MsgError_Ready,
+		Raw: fmt.Sprintf("%s", j),
+	})
+
 	s.UpdateStatus(0, ":)")
 }
 
 func messageCreate(s *discordgo.Session, m *discordgo.MessageCreate) {
+	j, err := json.Marshal(m)
+	if err != nil {
+		AddMessageDiscordErrorLog(MessageDiscordErrorLog{
+			Status: SQL_TYPE_CREATED,
+			Description: MsgError_Marshal,
+			Raw: fmt.Sprintf("%s", j),
+		})
+	}
+
+	defer func() {
+		if err := recover(); err != nil {
+			AddMessageDiscordErrorLog(MessageDiscordErrorLog{
+				Status: SQL_TYPE_CREATED,
+				Description: MsgError_Unknown,
+				Raw: fmt.Sprintf("%s", j),
+			})
+		}
+	}()
+
+	AddMessageDiscordLog(MessageDiscordLog{
+		Status: SQL_TYPE_CREATED,
+		Raw: fmt.Sprintf("%s", j),
+	})
 
 	c, err := s.State.Channel(m.ChannelID)
 	if err != nil {
-		AddMessageDiscordError(MessageDiscordErrorLog{
+		AddMessageDiscordErrorLog(MessageDiscordErrorLog{
 			Status: SQL_TYPE_CREATED,
 			Description: MsgError_Channel,
-			Raw: fmt.Sprintf("%#v", m),
+			Raw: fmt.Sprintf("%s", j),
 		})
 		return
 	}
 
 	g, err := s.State.Guild(c.GuildID)
 	if err != nil {
-		AddMessageDiscordError(MessageDiscordErrorLog{
+		AddMessageDiscordErrorLog(MessageDiscordErrorLog{
 			Status: SQL_TYPE_CREATED,
 			Description: MsgError_Guild,
-			Raw: fmt.Sprintf("%#v", m),
+			Raw: fmt.Sprintf("%s", j),
+		})
+		return
+	}
+
+	if m.Author == nil || m.Author.ID == "" || m.Author.Username == "" {
+		AddMessageDiscordErrorLog(MessageDiscordErrorLog{
+			Status: SQL_TYPE_UPDATE,
+			Description: MsgError_Author,
+			Raw: fmt.Sprintf("%s", j),
 		})
 		return
 	}
@@ -96,10 +144,10 @@ func messageCreate(s *discordgo.Session, m *discordgo.MessageCreate) {
 	err = db.AddMessageDiscord(MessageDiscord{
 		MessageID: m.ID,
 
-		GuildID: g.ID,
+		GuildID: m.GuildID,
 		GuildName: g.Name,
 
-		ChannelID: c.ID,
+		ChannelID: m.ChannelID,
 		ChannelName: c.Name,
 
 		AuthorID: m.Author.ID,
@@ -111,23 +159,55 @@ func messageCreate(s *discordgo.Session, m *discordgo.MessageCreate) {
 }
 
 func messageUpdate(s *discordgo.Session, m *discordgo.MessageUpdate) {
+	j, err := json.Marshal(m)
+	if err != nil {
+		AddMessageDiscordErrorLog(MessageDiscordErrorLog{
+			Status: SQL_TYPE_UPDATE,
+			Description: MsgError_Marshal,
+			Raw: fmt.Sprintf("%s", j),
+		})
+	}
+
+	defer func() {
+		if err := recover(); err != nil {
+			AddMessageDiscordErrorLog(MessageDiscordErrorLog{
+				Status: SQL_TYPE_UPDATE,
+				Description: MsgError_Unknown,
+				Raw: fmt.Sprintf("%s", j),
+			})
+		}
+	}()
+
+	AddMessageDiscordLog(MessageDiscordLog{
+		Status: SQL_TYPE_UPDATE,
+		Raw: fmt.Sprintf("%s", j),
+	})
 
 	c, err := s.State.Channel(m.ChannelID)
 	if err != nil {
-		AddMessageDiscordError(MessageDiscordErrorLog{
-			Status: SQL_TYPE_CREATED,
+		AddMessageDiscordErrorLog(MessageDiscordErrorLog{
+			Status: SQL_TYPE_UPDATE,
 			Description: MsgError_Channel,
-			Raw: fmt.Sprintf("%#v", m),
+			Raw: fmt.Sprintf("%s", j),
 		})
 		return
 	}
 
-	g, err := s.State.Guild(c.GuildID)
+	g, err := s.State.Guild(m.GuildID)
 	if err != nil {
-		AddMessageDiscordError(MessageDiscordErrorLog{
-			Status: SQL_TYPE_CREATED,
+		AddMessageDiscordErrorLog(MessageDiscordErrorLog{
+			Status: SQL_TYPE_UPDATE,
 			Description: MsgError_Guild,
-			Raw: fmt.Sprintf("%#v", m),
+			Raw: fmt.Sprintf("%s", j),
+		})
+		return
+	}
+
+	if m.Author == nil || m.Author.ID == "" || m.Author.Username == "" {
+		AddMessageDiscordErrorLog(MessageDiscordErrorLog{
+			Status: SQL_TYPE_UPDATE,
+			Description: MsgError_Author,
+			Raw: fmt.Sprintf("%s", j),
 		})
 		return
 	}
@@ -135,10 +215,10 @@ func messageUpdate(s *discordgo.Session, m *discordgo.MessageUpdate) {
 	err = db.UpdateMessageDiscord(MessageDiscord{
 		MessageID: m.ID,
 
-		GuildID: g.ID,
+		GuildID: m.GuildID,
 		GuildName: g.Name,
 
-		ChannelID: c.ID,
+		ChannelID: m.ChannelID,
 		ChannelName: c.Name,
 
 		AuthorID: m.Author.ID,
@@ -150,23 +230,46 @@ func messageUpdate(s *discordgo.Session, m *discordgo.MessageUpdate) {
 }
 
 func messageDelete(s *discordgo.Session, m *discordgo.MessageDelete) {
+	j, err := json.Marshal(m)
+	if err != nil {
+		AddMessageDiscordErrorLog(MessageDiscordErrorLog{
+			Status: SQL_TYPE_DELETED,
+			Description: MsgError_Marshal,
+			Raw: fmt.Sprintf("%s", j),
+		})
+	}
+
+	defer func() {
+		if err := recover(); err != nil {
+			AddMessageDiscordErrorLog(MessageDiscordErrorLog{
+				Status: SQL_TYPE_DELETED,
+				Description: MsgError_Unknown,
+				Raw: fmt.Sprintf("%s", j),
+			})
+		}
+	}()
+
+	AddMessageDiscordLog(MessageDiscordLog{
+		Status: SQL_TYPE_DELETED,
+		Raw: fmt.Sprintf("%s", j),
+	})
 
 	c, err := s.State.Channel(m.ChannelID)
 	if err != nil {
-		AddMessageDiscordError(MessageDiscordErrorLog{
-			Status: SQL_TYPE_CREATED,
+		AddMessageDiscordErrorLog(MessageDiscordErrorLog{
+			Status: SQL_TYPE_DELETED,
 			Description: MsgError_Channel,
-			Raw: fmt.Sprintf("%#v", m),
+			Raw: fmt.Sprintf("%s", j),
 		})
 		return
 	}
 
 	g, err := s.State.Guild(c.GuildID)
 	if err != nil {
-		AddMessageDiscordError(MessageDiscordErrorLog{
-			Status: SQL_TYPE_CREATED,
+		AddMessageDiscordErrorLog(MessageDiscordErrorLog{
+			Status: SQL_TYPE_DELETED,
 			Description: MsgError_Guild,
-			Raw: fmt.Sprintf("%#v", m),
+			Raw: fmt.Sprintf("%s", j),
 		})
 		return
 	}
@@ -174,10 +277,10 @@ func messageDelete(s *discordgo.Session, m *discordgo.MessageDelete) {
 	err = db.DeleteMessageDiscord(MessageDiscord{
 		MessageID: m.ID,
 
-		GuildID: g.ID,
+		GuildID: m.GuildID,
 		GuildName: g.Name,
 
-		ChannelID: c.ID,
+		ChannelID: m.ChannelID,
 		ChannelName: c.Name,
 	})
 
