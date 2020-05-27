@@ -3,6 +3,7 @@ package main
 import (
 	"flag"
 	"log"
+	"fmt"
 	"os"
 	"os/signal"
 	"syscall"
@@ -34,6 +35,7 @@ func main() {
 		log.Fatal(err)
 		return
 	}
+	defer db.Close()
 
 	if token == "" {
 		log.Println("No token provided.")
@@ -73,11 +75,21 @@ func messageCreate(s *discordgo.Session, m *discordgo.MessageCreate) {
 
 	c, err := s.State.Channel(m.ChannelID)
 	if err != nil {
+		AddMessageDiscordError(MessageDiscordErrorLog{
+			Status: SQL_TYPE_CREATED,
+			Description: MsgError_Channel,
+			Raw: fmt.Sprintf("%#v", m),
+		})
 		return
 	}
 
 	g, err := s.State.Guild(c.GuildID)
 	if err != nil {
+		AddMessageDiscordError(MessageDiscordErrorLog{
+			Status: SQL_TYPE_CREATED,
+			Description: MsgError_Guild,
+			Raw: fmt.Sprintf("%#v", m),
+		})
 		return
 	}
 
@@ -96,20 +108,27 @@ func messageCreate(s *discordgo.Session, m *discordgo.MessageCreate) {
 		Message: m.Content,
 	})
 
-	// log.Printf("CreateLog> %#v\n", err)
-
-	// s.ChannelMessageSend(m.ChannelID, "MessageCreate")
 }
 
 func messageUpdate(s *discordgo.Session, m *discordgo.MessageUpdate) {
 
 	c, err := s.State.Channel(m.ChannelID)
 	if err != nil {
+		AddMessageDiscordError(MessageDiscordErrorLog{
+			Status: SQL_TYPE_CREATED,
+			Description: MsgError_Channel,
+			Raw: fmt.Sprintf("%#v", m),
+		})
 		return
 	}
 
 	g, err := s.State.Guild(c.GuildID)
 	if err != nil {
+		AddMessageDiscordError(MessageDiscordErrorLog{
+			Status: SQL_TYPE_CREATED,
+			Description: MsgError_Guild,
+			Raw: fmt.Sprintf("%#v", m),
+		})
 		return
 	}
 
@@ -128,20 +147,27 @@ func messageUpdate(s *discordgo.Session, m *discordgo.MessageUpdate) {
 		Message: m.Content,
 	})
 
-	// log.Printf("EditLog> %#v\n", err)
-
-	// s.ChannelMessageSend(m.ChannelID, "MessageUpdate")
 }
 
 func messageDelete(s *discordgo.Session, m *discordgo.MessageDelete) {
 
 	c, err := s.State.Channel(m.ChannelID)
 	if err != nil {
+		AddMessageDiscordError(MessageDiscordErrorLog{
+			Status: SQL_TYPE_CREATED,
+			Description: MsgError_Channel,
+			Raw: fmt.Sprintf("%#v", m),
+		})
 		return
 	}
 
 	g, err := s.State.Guild(c.GuildID)
 	if err != nil {
+		AddMessageDiscordError(MessageDiscordErrorLog{
+			Status: SQL_TYPE_CREATED,
+			Description: MsgError_Guild,
+			Raw: fmt.Sprintf("%#v", m),
+		})
 		return
 	}
 
@@ -155,9 +181,6 @@ func messageDelete(s *discordgo.Session, m *discordgo.MessageDelete) {
 		ChannelName: c.Name,
 	})
 
-	// log.Printf("DeleteLog> %#v\n", err)
-
-	// s.ChannelMessageSend(m.ChannelID, "MessageDelete ID:" + )
 }
 
 func guildJoin(s *discordgo.Session, event *discordgo.GuildCreate) {

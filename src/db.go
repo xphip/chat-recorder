@@ -53,6 +53,25 @@ func (db *DB) Check() (err error) {
 	return
 }
 
+func AddMessageDiscordError(msg MessageDiscordErrorLog) (err error) {
+
+	table := fmt.Sprintf(`'%d','%s','%s'`,
+						msg.Status,
+						msg.Description,
+						msg.Raw,
+	)
+
+	sql := fmt.Sprintf(
+		SQL_INSERT,
+		Table_MessageDiscordErrorLog,
+		SQL_CreateMessageDiscordErrorLog_FIELDS,
+		table,
+	)
+	_, err = db.Conn.Exec(sql)
+
+	return
+}
+
 func (db *DB) AddMessageDiscord(msg MessageDiscord) (err error) {
 
 	table := fmt.Sprintf(`'%d', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s'`,
