@@ -15,11 +15,11 @@ const (
 
 	SQL_CHECK = `SELECT name FROM sqlite_master WHERE type='table' AND name='%s';`
 
-	SQL_CreateMessageDiscord_FIELDS = "in_status, cd_message_id, cd_guild, tx_guild, cd_channel, tx_channel, cd_author, tx_author, tx_message"
-	SQL_UpdateMessageDiscord_FIELDS = "in_status, cd_message_id, cd_guild, tx_guild, cd_channel, tx_channel, cd_author, tx_author, tx_message"
-	SQL_DeleteMessageDiscord_FIELDS = "in_status, cd_message_id, cd_guild, tx_guild, cd_channel, tx_channel"
+	SQL_CreateMessageDiscord_Fields = "in_status, cd_message_id, cd_guild, tx_guild, cd_channel, tx_channel, cd_author, tx_author, tx_message"
+	SQL_UpdateMessageDiscord_Fields = "in_status, cd_message_id, cd_guild, tx_guild, cd_channel, tx_channel, cd_author, tx_author, tx_message"
+	SQL_DeleteMessageDiscord_Fields = "in_status, cd_message_id, cd_guild, tx_guild, cd_channel, tx_channel"
 
-	SQL_CreateMessageDiscordErrorLog_FIELDS = "in_status, tx_description, tx_raw"
+	SQL_CreateMessageDiscordErrorLog_Fields = "in_status, tx_description, tx_raw"
 )
 
 const (

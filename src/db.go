@@ -34,7 +34,7 @@ func (db *DB) Close() (err error) {
 
 func (db *DB) Check() (err error) {
 
-	rows, err := db.Conn.Query(fmt.Sprintf(SQL_CHECK, "message_discorda"))
+	rows, err := db.Conn.Query(fmt.Sprintf(SQL_CHECK, Table_MessageDiscord))
 	if err != nil {
 		return
 	}
@@ -61,12 +61,7 @@ func AddMessageDiscordError(msg MessageDiscordErrorLog) (err error) {
 						msg.Raw,
 	)
 
-	sql := fmt.Sprintf(
-		SQL_INSERT,
-		Table_MessageDiscordErrorLog,
-		SQL_CreateMessageDiscordErrorLog_FIELDS,
-		table,
-	)
+	sql := fmt.Sprintf(SQL_INSERT, Table_MessageDiscordErrorLog, SQL_CreateMessageDiscordErrorLog_Fields, table)
 	_, err = db.Conn.Exec(sql)
 
 	return
@@ -86,7 +81,7 @@ func (db *DB) AddMessageDiscord(msg MessageDiscord) (err error) {
 						msg.Message,
 	)
 
-	sql := fmt.Sprintf(SQL_INSERT, "message_discord", SQL_CreateMessageDiscord_FIELDS, table)
+	sql := fmt.Sprintf(SQL_INSERT, Table_MessageDiscord, SQL_CreateMessageDiscord_Fields, table)
 	_, err = db.Conn.Exec(sql)
 
 	return
@@ -106,7 +101,7 @@ func (db *DB) UpdateMessageDiscord(msg MessageDiscord) (err error) {
 						msg.Message,
 	)
 
-	sql := fmt.Sprintf(SQL_INSERT, "message_discord", SQL_UpdateMessageDiscord_FIELDS, table)
+	sql := fmt.Sprintf(SQL_INSERT, Table_MessageDiscord, SQL_UpdateMessageDiscord_Fields, table)
 	_, err = db.Conn.Exec(sql)
 
 	return
@@ -123,7 +118,7 @@ func (db *DB) DeleteMessageDiscord(msg MessageDiscord) (err error) {
 						msg.ChannelName,
 	)
 
-	sql := fmt.Sprintf(SQL_INSERT, "message_discord", SQL_DeleteMessageDiscord_FIELDS, table)
+	sql := fmt.Sprintf(SQL_INSERT, Table_MessageDiscord, SQL_DeleteMessageDiscord_Fields, table)
 	_, err = db.Conn.Exec(sql)
 
 	return
